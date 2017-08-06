@@ -12,8 +12,8 @@ data "archive_file" "lambda" {
  */
 resource "aws_lambda_function" "lambda" {
   filename         = "${data.archive_file.lambda.output_path}"
-  function_name    = "hello-lambda"
-  role             = "${aws_iam_role.hello_lambda_role.arn}"
+  function_name    = "redirect-service"
+  role             = "${aws_iam_role.redirect_service_role.arn}"
   handler          = "index.handler"
   runtime          = "nodejs6.10"
   timeout          = 10
