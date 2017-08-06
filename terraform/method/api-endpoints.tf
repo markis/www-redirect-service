@@ -1,37 +1,31 @@
-/**
- * API Gateway - Hello Lambda Endpoint
- */
-resource "aws_api_gateway_resource" "redirect_service_api_resource" {
-  rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
-  parent_id   = "${aws_api_gateway_rest_api.redirect_service_api.root_resource_id}"
-  path_part   = "{name}"
-}
+variable "service_api_id" {}
+variable "resource_id" {}
+variable "region" {}
+variable "lambda_arn" {}
 
 resource "aws_api_gateway_method" "method" {
-  rest_api_id   = "${aws_api_gateway_rest_api.redirect_service_api.id}"
-  resource_id   = "${aws_api_gateway_resource.redirect_service_api_resource.id}"
+  rest_api_id   = "${var.service_api_id}"
+  resource_id   = "${var.resource_id}"
   http_method   = "GET"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "redirect_service_api_integration" {
-  rest_api_id             = "${aws_api_gateway_rest_api.redirect_service_api.id}"
-  resource_id             = "${aws_api_gateway_resource.redirect_service_api_resource.id}"
+  rest_api_id             = "${var.service_api_id}"
+  resource_id             = "${var.resource_id}"
   http_method             = "${aws_api_gateway_method.method.http_method}"
   integration_http_method = "POST" // it has to be post for lambdas
   type                    = "AWS"
-  uri                     = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${aws_lambda_function.lambda.arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_arn}/invocations"
 
   request_templates {
-    "application/json" = <<EOF
-      {"name": "$util.escapeJavaScript($input.params().get('path').get('name'))"}
-    EOF
+    "application/json" = "{\"name\": \"$util.escapeJavaScript($input.params().get('path').get('name'))\"}"
   }
 }
 
 resource "aws_api_gateway_method_response" "301" {
-  rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
-  resource_id = "${aws_api_gateway_resource.redirect_service_api_resource.id}"
+  rest_api_id = "${var.service_api_id}"
+  resource_id = "${var.resource_id}"
   http_method = "${aws_api_gateway_method.method.http_method}"
   status_code = "301"
 
@@ -46,8 +40,8 @@ resource "aws_api_gateway_method_response" "301" {
 }
 
 resource "aws_api_gateway_integration_response" "redirect_service_api_response" {
-  rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
-  resource_id = "${aws_api_gateway_resource.redirect_service_api_resource.id}"
+  rest_api_id = "${var.service_api_id}"
+  resource_id = "${var.resource_id}"
   http_method = "${aws_api_gateway_method.method.http_method}"
   status_code = "${aws_api_gateway_method_response.301.status_code}"
 

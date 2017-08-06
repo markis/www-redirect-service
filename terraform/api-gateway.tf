@@ -6,7 +6,6 @@ resource "aws_api_gateway_rest_api" "redirect_service_api" {
   description = "Redirect Service"
 }
 
-
 resource "aws_api_gateway_account" "redirect_service_api" {
   cloudwatch_role_arn = "${aws_iam_role.redirect_service_role.arn}"
 }
@@ -18,12 +17,32 @@ resource "aws_lambda_permission" "apigw_lambda" {
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.redirect_service_api.id}/*/${aws_api_gateway_method.method.http_method}/*"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.redirect_service_api.id}/*/GET/*"
 }
 
 resource "aws_api_gateway_deployment" "redirect_service_api_deploy" {
-  depends_on = ["aws_api_gateway_method.method"]
-
   rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
   stage_name  = "prod"
+}
+
+module "default_method" {
+  source          = "./method"
+  service_api_id  = "${aws_api_gateway_rest_api.redirect_service_api.id}"
+  resource_id     = "${aws_api_gateway_rest_api.redirect_service_api.root_resource_id}"
+  region          = "${data.aws_region.current.name}"
+  lambda_arn      = "${aws_lambda_function.lambda.arn}"
+}
+
+resource "aws_api_gateway_resource" "redirect_service_api_resource" {
+  rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.redirect_service_api.root_resource_id}"
+  path_part   = "{name}"
+}
+
+module "name_method" {
+  source          = "./method"
+  service_api_id  = "${aws_api_gateway_rest_api.redirect_service_api.id}"
+  resource_id     = "${aws_api_gateway_resource.redirect_service_api_resource.id}"
+  region          = "${data.aws_region.current.name}"
+  lambda_arn      = "${aws_lambda_function.lambda.arn}"
 }
