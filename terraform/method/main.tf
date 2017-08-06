@@ -11,6 +11,7 @@ resource "aws_api_gateway_method" "method" {
 }
 
 resource "aws_api_gateway_integration" "redirect_service_api_integration" {
+  depends_on              = ["aws_api_gateway_method.method"]
   rest_api_id             = "${var.service_api_id}"
   resource_id             = "${var.resource_id}"
   http_method             = "${aws_api_gateway_method.method.http_method}"
@@ -24,6 +25,7 @@ resource "aws_api_gateway_integration" "redirect_service_api_integration" {
 }
 
 resource "aws_api_gateway_method_response" "301" {
+  depends_on  = ["aws_api_gateway_integration.redirect_service_api_integration"]
   rest_api_id = "${var.service_api_id}"
   resource_id = "${var.resource_id}"
   http_method = "${aws_api_gateway_method.method.http_method}"
@@ -40,7 +42,7 @@ resource "aws_api_gateway_method_response" "301" {
 }
 
 resource "aws_api_gateway_integration_response" "redirect_service_api_response" {
-  depends_on  = ["aws_api_gateway_integration.redirect_service_api_integration"]
+  depends_on  = ["aws_api_gateway_method_response.301"]
   rest_api_id = "${var.service_api_id}"
   resource_id = "${var.resource_id}"
   http_method = "${aws_api_gateway_method.method.http_method}"

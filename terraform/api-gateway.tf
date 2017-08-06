@@ -21,6 +21,7 @@ resource "aws_lambda_permission" "apigw_lambda" {
 }
 
 resource "aws_api_gateway_deployment" "redirect_service_api_deploy" {
+  depends_on  = ["module.default_method", "module.name_method"]
   rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
   stage_name  = "prod"
 }

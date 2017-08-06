@@ -7,5 +7,8 @@ init:
 install:
 	@terraform apply -state ./.terraform/apply.state
 
+uninstall:
+	@terraform destroy
+
 deploy:
 	@terraform apply
