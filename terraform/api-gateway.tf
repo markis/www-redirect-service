@@ -25,6 +25,10 @@ resource "aws_api_gateway_deployment" "redirect_service_api_deploy" {
   stage_name  = "prod"
 }
 
+/**
+ * Default Method
+ * This attaches the lambda to the root resource
+ */
 module "default_method" {
   source          = "./method"
   service_api_id  = "${aws_api_gateway_rest_api.redirect_service_api.id}"
@@ -33,6 +37,10 @@ module "default_method" {
   lambda_arn      = "${aws_lambda_function.lambda.arn}"
 }
 
+/**
+ * Name Method
+ * This attaches the lambda to a resource with a path of "{name}"
+ */
 resource "aws_api_gateway_resource" "redirect_service_api_resource" {
   rest_api_id = "${aws_api_gateway_rest_api.redirect_service_api.id}"
   parent_id   = "${aws_api_gateway_rest_api.redirect_service_api.root_resource_id}"

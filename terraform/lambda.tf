@@ -16,6 +16,6 @@ resource "aws_lambda_function" "lambda" {
   role             = "${aws_iam_role.redirect_service_role.arn}"
   handler          = "index.handler"
   runtime          = "nodejs6.10"
-  timeout          = 10
+  timeout          = 2
   source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
 }
