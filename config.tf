@@ -4,7 +4,7 @@
 terraform {
   backend "s3" {
     bucket = "terraform-status"
-    key    = "redirect_service.tfstate"
+    key    = "www_redirect_service.tfstate"
     # Note the terraform state file can be stored in a different region than where the api is deployed
     region = "us-east-1" 
   }
@@ -18,7 +18,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-module "redirect_service" {
+module "www_redirect_service" {
   source        = "./terraform"
   lambda_folder = "${path.module}/src/"
 }

@@ -10,7 +10,7 @@ resource "aws_api_gateway_method" "method" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "redirect_service_api_integration" {
+resource "aws_api_gateway_integration" "www_redirect_service_api_integration" {
   depends_on              = ["aws_api_gateway_method.method"]
   rest_api_id             = "${var.service_api_id}"
   resource_id             = "${var.resource_id}"
@@ -21,12 +21,17 @@ resource "aws_api_gateway_integration" "redirect_service_api_integration" {
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_arn}/invocations"
 
   request_templates {
-    "application/json" = "{\"name\": \"$util.escapeJavaScript($input.params().get('path').get('name'))\"}"
+    "application/json" = <<EOF
+      {
+        "host": "$input.params('host')",
+        "path": "$input.params('path')"
+      }
+    EOF
   }
 }
 
 resource "aws_api_gateway_method_response" "301" {
-  depends_on  = ["aws_api_gateway_integration.redirect_service_api_integration"]
+  depends_on  = ["aws_api_gateway_integration.www_redirect_service_api_integration"]
   rest_api_id = "${var.service_api_id}"
   resource_id = "${var.resource_id}"
   http_method = "${aws_api_gateway_method.method.http_method}"
@@ -35,11 +40,10 @@ resource "aws_api_gateway_method_response" "301" {
   response_parameters = {
     "method.response.header.Location" = true
     "method.response.header.Cache-Control" = true
-    "method.response.header.ETag" = true
   }
 }
 
-resource "aws_api_gateway_integration_response" "redirect_service_api_response" {
+resource "aws_api_gateway_integration_response" "www_redirect_service_api_response" {
   depends_on  = ["aws_api_gateway_method_response.301"]
   rest_api_id = "${var.service_api_id}"
   resource_id = "${var.resource_id}"
@@ -49,7 +53,6 @@ resource "aws_api_gateway_integration_response" "redirect_service_api_response" 
   response_parameters = { 
     "method.response.header.Location" = "integration.response.body.location"
     "method.response.header.Cache-Control" = "integration.response.body.cache"
-    "method.response.header.ETag" = "integration.response.body.etag"
   }
   response_templates {
     "application/json" = "{}"

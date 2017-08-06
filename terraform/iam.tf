@@ -1,8 +1,8 @@
 /**
  * IAM Roles
  */
-resource "aws_iam_role" "redirect_service_role" {
-  name = "redirect_service_role"
+resource "aws_iam_role" "www_redirect_service_role" {
+  name = "www_redirect_service_role"
 
   assume_role_policy = <<EOF
 {
@@ -33,6 +33,6 @@ EOF
  * Policy Attachments
  */
 resource "aws_iam_role_policy_attachment" "lambda-basic-execution" {
-  role       = "${aws_iam_role.redirect_service_role.name}"
+  role       = "${aws_iam_role.www_redirect_service_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/AWSLambdaExecute"
 }
