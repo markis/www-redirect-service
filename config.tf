@@ -1,6 +1,5 @@
 /*
  * Terraform State persistance location.
- * Unfortunately it has to be hard coded here
  */
 terraform {
   backend "s3" {
@@ -13,7 +12,7 @@ terraform {
 
 /*
  * Terraform AWS provider
- * This will dictate which region the Hello Lambda API is deployed
+ * This will dictate which region the redirect service is deployed
  */
 provider "aws" {
   region = "us-east-1"
