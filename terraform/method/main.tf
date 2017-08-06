@@ -15,6 +15,7 @@ resource "aws_api_gateway_integration" "redirect_service_api_integration" {
   rest_api_id             = "${var.service_api_id}"
   resource_id             = "${var.resource_id}"
   http_method             = "${aws_api_gateway_method.method.http_method}"
+  passthrough_behavior    = "NEVER"
   integration_http_method = "POST" // it has to be post for lambdas
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_arn}/invocations"
@@ -36,9 +37,6 @@ resource "aws_api_gateway_method_response" "301" {
     "method.response.header.Cache-Control" = true
     "method.response.header.ETag" = true
   }
-  response_models = {
-    "application/json" = "Empty"
-  }
 }
 
 resource "aws_api_gateway_integration_response" "redirect_service_api_response" {
@@ -54,6 +52,6 @@ resource "aws_api_gateway_integration_response" "redirect_service_api_response" 
     "method.response.header.ETag" = "integration.response.body.etag"
   }
   response_templates {
-    "application/json" = ""
+    "application/json" = "{}"
   }
 }
